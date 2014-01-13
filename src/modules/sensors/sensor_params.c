@@ -1,9 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (C) 2012 PX4 Development Team. All rights reserved.
- *   Author: @author Lorenz Meier <lm@inf.ethz.ch>
- *           @author Thomas Gubler <thomasgubler@student.ethz.ch>
- *           @author Julian Oes <joes@student.ethz.ch>
+ *   Copyright (c) 2012-2014 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,6 +35,10 @@
  * @file sensor_params.c
  *
  * Parameters defined by the sensors task.
+ *
+ * @author Lorenz Meier <lm@inf.ethz.ch>
+ * @author Julian Oes <joes@student.ethz.ch>
+ * @author Thomas Gubler <thomasgubler@student.ethz.ch>
  */
 
 #include <nuttx/config.h>
@@ -45,41 +46,98 @@
 #include <systemlib/param/param.h>
 
 /**
- * Gyro X offset FIXME
+ * Gyro X offset
  *
- * This is an X-axis offset for the gyro.
- * Adjust it according to the calibration data.
+ * This is an X-axis offset for the gyro. Adjust it according to the calibration data.
  *
  * @min -10.0
  * @max 10.0
- * @group Gyro Config
+ * @group Sensor Calibration
  */
 PARAM_DEFINE_FLOAT(SENS_GYRO_XOFF, 0.0f);
 
 /**
- * Gyro Y offset FIXME with dot.
+ * Gyro Y offset
  *
  * @min -10.0
  * @max 10.0
- * @group Gyro Config
+ * @group Sensor Calibration
  */
 PARAM_DEFINE_FLOAT(SENS_GYRO_YOFF, 0.0f);
 
 /**
- * Gyro Z offset FIXME
+ * Gyro Z offset
  *
  * @min -5.0
  * @max 5.0
- * @group Gyro Config
+ * @group Sensor Calibration
  */
 PARAM_DEFINE_FLOAT(SENS_GYRO_ZOFF, 0.0f);
 
+/**
+ * Gyro X scaling
+ *
+ * X-axis scaling.
+ *
+ * @min -1.5
+ * @max 1.5
+ * @group Sensor Calibration
+ */
 PARAM_DEFINE_FLOAT(SENS_GYRO_XSCALE, 1.0f);
+
+/**
+ * Gyro Y scaling
+ *
+ * Y-axis scaling.
+ *
+ * @min -1.5
+ * @max 1.5
+ * @group Sensor Calibration
+ */
 PARAM_DEFINE_FLOAT(SENS_GYRO_YSCALE, 1.0f);
+
+/**
+ * Gyro Z scaling
+ *
+ * Z-axis scaling.
+ *
+ * @min -1.5
+ * @max 1.5
+ * @group Sensor Calibration
+ */
 PARAM_DEFINE_FLOAT(SENS_GYRO_ZSCALE, 1.0f);
 
+/**
+ * Magnetometer X offset
+ *
+ * This is an X-axis offset for the magnetometer.
+ *
+ * @min -500.0
+ * @max 500.0
+ * @group Sensor Calibration
+ */
 PARAM_DEFINE_FLOAT(SENS_MAG_XOFF, 0.0f);
+
+/**
+ * Magnetometer Y offset
+ *
+ * This is an Y-axis offset for the magnetometer.
+ *
+ * @min -500.0
+ * @max 500.0
+ * @group Sensor Calibration
+ */
 PARAM_DEFINE_FLOAT(SENS_MAG_YOFF, 0.0f);
+
+/**
+ * Magnetometer Z offset
+ *
+ * This is an Z-axis offset for the magnetometer.
+ *
+ * @min -500.0
+ * @max 500.0
+ * @group Sensor Calibration
+ */
 PARAM_DEFINE_FLOAT(SENS_MAG_ZOFF, 0.0f);
 
 PARAM_DEFINE_FLOAT(SENS_MAG_XSCALE, 1.0f);
@@ -100,53 +158,151 @@ PARAM_DEFINE_INT32(SENS_DPRES_ANA, 0);
 PARAM_DEFINE_INT32(SENS_BOARD_ROT, 0);
 PARAM_DEFINE_INT32(SENS_EXT_MAG_ROT, 0);
 
+/**
+ * RC Channel 1 Minimum
+ *
+ * Minimum value for RC channel 1
+ *
+ * @min 800.0
+ * @max 1500.0
+ * @group Radio Calibration
+ */
 PARAM_DEFINE_FLOAT(RC1_MIN, 1000.0f);
-PARAM_DEFINE_FLOAT(RC1_TRIM, 1500.0f);
-PARAM_DEFINE_FLOAT(RC1_MAX, 2000.0f);
-PARAM_DEFINE_FLOAT(RC1_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC1_DZ, 0.0f);
 
-PARAM_DEFINE_FLOAT(RC2_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC2_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC2_MAX, 2000);
+/**
+ * RC Channel 1 Trim
+ *
+ * Mid point value (same as min for throttle)
+ *
+ * @min 800.0
+ * @max 2200.0
+ * @group Radio Calibration
+ */
+PARAM_DEFINE_FLOAT(RC1_TRIM, 1500.0f);
+
+/**
+ * RC Channel 1 Maximum
+ *
+ * Maximum value for RC channel 1
+ *
+ * @min 1500.0
+ * @max 2200.0
+ * @group Radio Calibration
+ */
+PARAM_DEFINE_FLOAT(RC1_MAX, 2000.0f);
+
+/**
+ * RC Channel 1 Reverse
+ *
+ * Set to -1 to reverse channel.
+ *
+ * @min -1.0
+ * @max 1.0
+ * @group Radio Calibration
+ */
+PARAM_DEFINE_FLOAT(RC1_REV, 1.0f);
+
+/**
+ * RC Channel 1 dead zone
+ *
+ * The +- range of this value around the trim value will be considered as zero.
+ *
+ * @min 0.0
+ * @max 100.0
+ * @group Radio Calibration
+ */
+PARAM_DEFINE_FLOAT(RC1_DZ, 10.0f);
+
+/**
+ * RC Channel 2 Minimum
+ *
+ * Minimum value for RC channel 2
+ *
+ * @min 800.0
+ * @max 1500.0
+ * @group Radio Calibration
+ */
+PARAM_DEFINE_FLOAT(RC2_MIN, 1000.0f);
+
+/**
+ * RC Channel 2 Trim
+ *
+ * Mid point value (same as min for throttle)
+ *
+ * @min 800.0
+ * @max 2200.0
+ * @group Radio Calibration
+ */
+PARAM_DEFINE_FLOAT(RC2_TRIM, 1500.0f);
+
+/**
+ * RC Channel 2 Maximum
+ *
+ * Maximum value for RC channel 2
+ *
+ * @min 1500.0
+ * @max 2200.0
+ * @group Radio Calibration
+ */
+PARAM_DEFINE_FLOAT(RC2_MAX, 2000.0f);
+
+/**
+ * RC Channel 2 Reverse
+ *
+ * Set to -1 to reverse channel.
+ *
+ * @min -1.0
+ * @max 1.0
+ * @group Radio Calibration
+ */
 PARAM_DEFINE_FLOAT(RC2_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC2_DZ, 0.0f);
+
+/**
+ * RC Channel 2 dead zone
+ *
+ * The +- range of this value around the trim value will be considered as zero.
+ *
+ * @min 0.0
+ * @max 100.0
+ * @group Radio Calibration
+ */
+PARAM_DEFINE_FLOAT(RC2_DZ, 10.0f);
 
 PARAM_DEFINE_FLOAT(RC3_MIN, 1000);
 PARAM_DEFINE_FLOAT(RC3_TRIM, 1500);
 PARAM_DEFINE_FLOAT(RC3_MAX, 2000);
 PARAM_DEFINE_FLOAT(RC3_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC3_DZ, 0.0f);
+PARAM_DEFINE_FLOAT(RC3_DZ, 10.0f);
 
 PARAM_DEFINE_FLOAT(RC4_MIN, 1000);
 PARAM_DEFINE_FLOAT(RC4_TRIM, 1500);
 PARAM_DEFINE_FLOAT(RC4_MAX, 2000);
 PARAM_DEFINE_FLOAT(RC4_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC4_DZ, 30.0f);
+PARAM_DEFINE_FLOAT(RC4_DZ, 10.0f);
 
 PARAM_DEFINE_FLOAT(RC5_MIN, 1000);
 PARAM_DEFINE_FLOAT(RC5_TRIM, 1500);
 PARAM_DEFINE_FLOAT(RC5_MAX, 2000);
 PARAM_DEFINE_FLOAT(RC5_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC5_DZ,  0.0f);
+PARAM_DEFINE_FLOAT(RC5_DZ,  10.0f);
 
 PARAM_DEFINE_FLOAT(RC6_MIN, 1000);
 PARAM_DEFINE_FLOAT(RC6_TRIM, 1500);
 PARAM_DEFINE_FLOAT(RC6_MAX, 2000);
 PARAM_DEFINE_FLOAT(RC6_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC6_DZ, 0.0f);
+PARAM_DEFINE_FLOAT(RC6_DZ, 10.0f);
 
 PARAM_DEFINE_FLOAT(RC7_MIN, 1000);
 PARAM_DEFINE_FLOAT(RC7_TRIM, 1500);
 PARAM_DEFINE_FLOAT(RC7_MAX, 2000);
 PARAM_DEFINE_FLOAT(RC7_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC7_DZ, 0.0f);
+PARAM_DEFINE_FLOAT(RC7_DZ, 10.0f);
 
 PARAM_DEFINE_FLOAT(RC8_MIN, 1000);
 PARAM_DEFINE_FLOAT(RC8_TRIM, 1500);
 PARAM_DEFINE_FLOAT(RC8_MAX, 2000);
 PARAM_DEFINE_FLOAT(RC8_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC8_DZ, 0.0f);
+PARAM_DEFINE_FLOAT(RC8_DZ, 10.0f);
 
 PARAM_DEFINE_FLOAT(RC9_MIN, 1000);
 PARAM_DEFINE_FLOAT(RC9_TRIM, 1500);
@@ -189,6 +345,24 @@ PARAM_DEFINE_FLOAT(RC15_TRIM, 1500);
 PARAM_DEFINE_FLOAT(RC15_MAX, 2000);
 PARAM_DEFINE_FLOAT(RC15_REV, 1.0f);
 PARAM_DEFINE_FLOAT(RC15_DZ, 0.0f);
+
+PARAM_DEFINE_FLOAT(RC16_MIN, 1000);
+PARAM_DEFINE_FLOAT(RC16_TRIM, 1500);
+PARAM_DEFINE_FLOAT(RC16_MAX, 2000);
+PARAM_DEFINE_FLOAT(RC16_REV, 1.0f);
+PARAM_DEFINE_FLOAT(RC16_DZ, 0.0f);
+
+PARAM_DEFINE_FLOAT(RC17_MIN, 1000);
+PARAM_DEFINE_FLOAT(RC17_TRIM, 1500);
+PARAM_DEFINE_FLOAT(RC17_MAX, 2000);
+PARAM_DEFINE_FLOAT(RC17_REV, 1.0f);
+PARAM_DEFINE_FLOAT(RC17_DZ, 0.0f);
+
+PARAM_DEFINE_FLOAT(RC18_MIN, 1000);
+PARAM_DEFINE_FLOAT(RC18_TRIM, 1500);
+PARAM_DEFINE_FLOAT(RC18_MAX, 2000);
+PARAM_DEFINE_FLOAT(RC18_REV, 1.0f);
+PARAM_DEFINE_FLOAT(RC18_DZ, 0.0f);
 
 #ifdef CONFIG_ARCH_BOARD_PX4FMU_V1
 PARAM_DEFINE_INT32(RC_RL1_DSM_VCC, 0); /* Relay 1 controls DSM VCC */

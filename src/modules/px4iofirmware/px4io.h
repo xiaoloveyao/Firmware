@@ -53,7 +53,9 @@
  */
 #define PX4IO_SERVO_COUNT		8
 #define PX4IO_CONTROL_CHANNELS		8
-#define PX4IO_INPUT_CHANNELS		8 // XXX this should be 18 channels
+#define PX4IO_CONTROL_GROUPS		2
+#define PX4IO_RC_INPUT_CHANNELS		18
+#define PX4IO_RC_MAPPED_CONTROL_CHANNELS		8 /**< This is the maximum number of channels mapped/used */
 
 /*
  * Debug logging
@@ -169,6 +171,8 @@ extern pwm_limit_t pwm_limit;
 
 #define BUTTON_SAFETY		stm32_gpioread(GPIO_BTN_SAFETY)
 
+#define CONTROL_PAGE_INDEX(_group, _channel) (_group * PX4IO_CONTROL_CHANNELS + _channel)
+
 /*
  * Mixer
  */
@@ -216,3 +220,7 @@ extern volatile uint8_t debug_level;
 
 /** send a debug message to the console */
 extern void	isr_debug(uint8_t level, const char *fmt, ...);
+
+/** schedule a reboot */
+extern void schedule_reboot(uint32_t time_delta_usec);
+

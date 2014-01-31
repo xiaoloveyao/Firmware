@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (C) 2012 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2012, 2013 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -317,7 +317,7 @@ dsm_bind(uint16_t cmd, int pulses)
  * @return true=DSM frame successfully decoded, false=no update
  */
 static bool
-dsm_decode(hrt_abstime frame_time, uint16_t *values, uint16_t *num_values)
+dsm_decode(hrt_abstime frame_time, uint16_t *values, uint16_t *frame_drop, uint16_t *num_values)
 {
 	/*
 	debug("DSM dsm_frame %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x",
@@ -341,8 +341,7 @@ dsm_decode(hrt_abstime frame_time, uint16_t *values, uint16_t *num_values)
 	}
 
 	/*
-	 * The encoding of the first two bytes is uncertain, so we're
-	 * going to ignore them for now.
+	 * The first two bytes represent a frame drop counter.
 	 *
 	 * Each channel is a 16-bit unsigned value containing either a 10-
 	 * or 11-bit channel value and a 4-bit channel number, shifted
@@ -351,6 +350,10 @@ dsm_decode(hrt_abstime frame_time, uint16_t *values, uint16_t *num_values)
 	 * seven channels are being transmitted.
 	 */
 
+	/* update frame drop counter */
+	*frame_drop = ((dsm_frame[0] << 8) | dsm_frame[1]);
+
+	/* set channel values */
 	for (unsigned i = 0; i < DSM_FRAME_CHANNELS; i++) {
 
 		uint8_t *dp = &dsm_frame[2 + (2 * i)];
@@ -431,7 +434,7 @@ dsm_decode(hrt_abstime frame_time, uint16_t *values, uint16_t *num_values)
  * @return true=decoded raw channel values updated, false=no update
  */
 bool
-dsm_input(uint16_t *values, uint16_t *num_values)
+dsm_input(uint16_t *values, uint16_t *frame_drop, uint16_t *num_values)
 {
 	ssize_t		ret;
 	hrt_abstime	now;
@@ -475,5 +478,5 @@ dsm_input(uint16_t *values, uint16_t *num_values)
 	 * decode it.
 	 */
 	dsm_partial_frame_count = 0;
-	return dsm_decode(now, values, num_values);
+	return dsm_decode(now, values, frame_drop, num_values);
 }

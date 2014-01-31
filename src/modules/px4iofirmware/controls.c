@@ -117,7 +117,10 @@ controls_tick() {
 
 	perf_begin(c_gather_dsm);
 	uint16_t temp_count = r_raw_rc_count;
-	bool dsm_updated = dsm_input(r_raw_rc_values, &temp_count);
+	uint16_t frame_drop_count;
+	static uint16_t dsm_frame_drop_counter = 0;
+	static uint16_t dsm_last_stable_frame_drop_count = 0;
+	bool dsm_updated = dsm_input(r_raw_rc_values, &frame_drop_count, &temp_count);
 	if (dsm_updated) {
 		r_raw_rc_flags |= PX4IO_P_STATUS_FLAGS_RC_DSM;
 		r_raw_rc_count = temp_count & 0x7fff;
@@ -126,8 +129,26 @@ controls_tick() {
 		else
 			r_raw_rc_flags &= ~PX4IO_P_RAW_RC_FLAGS_RC_DSM11;
 
-		r_raw_rc_flags &= ~(PX4IO_P_RAW_RC_FLAGS_FRAME_DROP);
 		r_raw_rc_flags &= ~(PX4IO_P_RAW_RC_FLAGS_FAILSAFE);
+
+		rssi = 255;
+
+		if (dsm_frame_drop_counter != frame_drop_count) {
+			r_raw_rc_flags |= PX4IO_P_RAW_RC_FLAGS_FRAME_DROP;
+			rssi = 100;
+		} else {
+			r_raw_rc_flags &= ~(PX4IO_P_RAW_RC_FLAGS_FRAME_DROP);
+			dsm_last_stable_frame_drop_count = frame_drop_count;
+		}
+		dsm_frame_drop_counter = frame_drop_count;
+
+		// XXX check thresholds, targeted here at ~1 second
+		if (frame_drop_count - dsm_last_stable_frame_drop_count > 50) {
+			r_raw_rc_flags |= PX4IO_P_RAW_RC_FLAGS_FAILSAFE;
+			rssi = 0;
+		} else {
+			r_raw_rc_flags &= ~(PX4IO_P_RAW_RC_FLAGS_FAILSAFE);
+		}
 
 	}
 	perf_end(c_gather_dsm);

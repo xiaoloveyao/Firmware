@@ -93,7 +93,8 @@ dsm_decode_channel(uint16_t raw, unsigned shift, unsigned *channel, unsigned *va
 	if (raw == 0xffff)
 		return false;
 
-	*channel = (raw >> shift) & 0xf;
+	*channel = (raw >> shift) & 0x7;
+	// XXX handle the MSB - could be channel group / packet index or not relevant
 
 	uint16_t data_mask = (1 << shift) - 1;
 	*value = raw & data_mask;

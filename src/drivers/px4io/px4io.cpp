@@ -1275,10 +1275,14 @@ void
 PX4IO::dsm_bind_ioctl(int dsmMode)
 {
 	if (!(_status & PX4IO_P_STATUS_FLAGS_SAFETY_OFF)) {
-		/* 0: dsm2, 1:dsmx */
+		/* 0: dsm2, 1:dsmx, 2:dsmx high-channel count */
 		if ((dsmMode == 0) || (dsmMode == 1)) {
 			mavlink_log_info(_thread_mavlink_fd, "[IO] binding dsm%s rx", (dsmMode == 0) ? "2" : ((dsmMode == 1) ? "x" : "x8"));
-			ioctl(nullptr, DSM_BIND_START, (dsmMode == 0) ? DSM2_BIND_PULSES : ((dsmMode == 1) ? DSMX_BIND_PULSES : DSMX8_BIND_PULSES));
+			int ret = ioctl(nullptr, DSM_BIND_START, (dsmMode == 0) ? DSM2_BIND_PULSES : ((dsmMode == 1) ? DSMX_BIND_PULSES : DSMX8_BIND_PULSES));
+
+			if (ret)
+				mavlink_log_critical(_thread_mavlink_fd, "binding failed.");
+
 		} else {
 			mavlink_log_info(_thread_mavlink_fd, "[IO] invalid dsm bind mode, bind request rejected");
 		}

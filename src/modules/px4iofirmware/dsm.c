@@ -50,8 +50,8 @@
 
 #include "px4io.h"
 
-#define DSM_FRAME_SIZE		16		/**<DSM frame size in bytes*/
-#define DSM_FRAME_CHANNELS	7		/**<Max supported DSM channels*/
+#define DSM_FRAME_SIZE		16		/**< DSM frame size in bytes */
+#define DSM_FRAME_CHANNELS	7		/**< DSM channels per frame */
 
 static int dsm_fd = -1;						/**< File handle to the DSM UART */
 static hrt_abstime dsm_last_rx_time;		/**< Timestamp when we last received */
@@ -341,8 +341,7 @@ dsm_decode(hrt_abstime frame_time, uint16_t *values, uint16_t *num_values)
 	}
 
 	/*
-	 * The encoding of the first two bytes is uncertain, so we're
-	 * going to ignore them for now.
+	 * The first two bytes include a drop counter, not returning yet.
 	 *
 	 * Each channel is a 16-bit unsigned value containing either a 10-
 	 * or 11-bit channel value and a 4-bit channel number, shifted
@@ -375,27 +374,9 @@ dsm_decode(hrt_abstime frame_time, uint16_t *values, uint16_t *num_values)
 		value += 998;
 
 		/*
-		 * Store the decoded channel into the R/C input buffer, taking into
-		 * account the different ideas about channel assignement that we have.
-		 *
-		 * Specifically, the first four channels in rc_channel_data are roll, pitch, thrust, yaw,
-		 * but the first four channels from the DSM receiver are thrust, roll, pitch, yaw.
+		 * Store the decoded channel into the R/C input buffer in the same order as emitted
+		 * by the RC.
 		 */
-		switch (channel) {
-		case 0:
-			channel = 2;
-			break;
-
-		case 1:
-			channel = 0;
-			break;
-
-		case 2:
-			channel = 1;
-
-		default:
-			break;
-		}
 
 		values[channel] = value;
 	}

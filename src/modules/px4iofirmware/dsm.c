@@ -87,14 +87,13 @@ static unsigned dsm_frame_drops;			/**< Count of incomplete DSM frames */
  * @return true=raw value successfully decoded
  */
 static bool
-dsm_decode_channel(uint16_t raw, unsigned shift, unsigned *channel, unsigned *value)
+dsm_decode_channel(uint16_t raw, unsigned shift, unsigned frame_index, unsigned *channel, unsigned *value)
 {
 
 	if (raw == 0xffff)
 		return false;
 
-	*channel = (raw >> shift) & 0x7;
-	// XXX handle the MSB - could be channel group / packet index or not relevant
+	*channel = ((raw >> shift) & 0x7) + frame_index * DSM_FRAME_CHANNELS;
 
 	uint16_t data_mask = (1 << shift) - 1;
 	*value = raw & data_mask;
@@ -351,13 +350,18 @@ dsm_decode(hrt_abstime frame_time, uint16_t *values, uint16_t *num_values)
 	 * seven channels are being transmitted.
 	 */
 
+	/*
+	 * Spektrum distributes the RC channels over multiple frames
+	 */
+	unsigned frame_index = (dp[0] & 0x80);
+
 	for (unsigned i = 0; i < DSM_FRAME_CHANNELS; i++) {
 
 		uint8_t *dp = &dsm_frame[2 + (2 * i)];
 		uint16_t raw = (dp[0] << 8) | dp[1];
 		unsigned channel, value;
 
-		if (!dsm_decode_channel(raw, dsm_channel_shift, &channel, &value))
+		if (!dsm_decode_channel(raw, dsm_channel_shift, frame_index, &channel, &value))
 			continue;
 
 		/* ignore channels out of range */
@@ -390,7 +394,14 @@ dsm_decode(hrt_abstime frame_time, uint16_t *values, uint16_t *num_values)
 	/*
 	 * XXX Note that we may be in failsafe here; we need to work out how to detect that.
 	 */
-	return true;
+
+	/* return true if all expected frames have been decoded */
+	bool double_frame = (dsm_frame[1] & 0x03);
+	if (!double_frame || (double_frame && frame_index)) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 /**
